@@ -1,6 +1,6 @@
 <template>
-  <button :hidden="record"  @click="record=true" class=" bg-green-500 ">Record</button>
-  <button  :hidden="!record" @click="record = false" class=" bg-red-500 ">Stop</button>
+  <button :hidden="record" @click="start_recording(true)" class=" bg-green-500 ">Record</button>
+  <button :hidden="!record" @click="start_recording(false)" class=" bg-red-500 ">Stop</button>
 
   <div class="flex">
 
@@ -20,40 +20,50 @@
 </template>
   
 <script setup lang="ts">
+import { invoke } from "@tauri-apps/api/tauri";
 import { Event, listen } from '@tauri-apps/api/event';
+
 import { ref } from 'vue';
 
 const grid = ref<HTMLElement | null>(null);
 const test_section = ref<HTMLTextAreaElement | null>(null);
-const record=ref<boolean>(false);
+const record = ref<boolean>(false);
 
 
 interface KeyPress {
-    key: string;
-    duration: {
-      secs: number;
-      nanos: number;
-    };
-    start_time: {
-      secs: number;
-      nanos: number;
-    };
-  }
+  key: string;
+  duration: {
+    secs: number;
+    nanos: number;
+  };
+  start_time: {
+    secs: number;
+    nanos: number;
+  };
+}
+
+async function start_recording(bool: boolean) {
+  record.value = bool;
+
+  const ans = await invoke("start_record");
+  console.log(ans);
+
+}
 
 async function Intialise() {
-  record.value=true;
+  record.value = true;
 
   await listen<String>('updateCounter', (event: Event<String>) => {
 
- 
+
     const keyPresses: KeyPress[] = JSON.parse(event.payload.toString());
     if (grid.value && test_section.value) {
       const han_num: number = keyPresses.length - 1;
       const gridColumns: string[] = Array.from({ length: 7 }, (_, index) => index === 0 ? '1fr' : index <= han_num ? '1fr' : '0fr');
       grid.value.style.gridTemplateColumns = gridColumns.join(' ');
       console.log(keyPresses);
-      
-      if (record.value) { 
+
+      if (record.value) {
         test_section.value.value = test_section.value.value + "\n" + JSON.stringify(keyPresses);
       }
     }

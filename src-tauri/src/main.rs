@@ -1,8 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri;
+use tauri::{self, Manager};
 
+use std::sync::{Arc, Mutex};
 use std::{
     // sync::mpsc::{self, Receiver, Sender},
     thread,
@@ -12,21 +13,26 @@ use std::{
 use rdev::listen;
 // use std::sync::Mutex;
 
+mod commands;
 mod core;
 mod types;
+use crate::commands::{start_record, stop_record};
 use crate::core::core;
-// mod command;
 use crate::core::input_event_callback;
-
 #[derive(Clone, serde::Serialize)]
 struct Payload {
     data: String,
 }
 
+pub struct MYREC(Arc<Mutex<bool>>);
+
 fn main() {
+    // let app_state = AppState::default();
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![start_record, stop_record])
         .setup(|app| {
+            app.manage(MYREC(Arc::new(Mutex::new(false))));
             // Spawn a new thread to listen for input events using the callback function.
             thread::spawn(|| {
                 if let Err(error) = listen(input_event_callback) {
@@ -34,7 +40,6 @@ fn main() {
                 }
             });
             let handle = app.handle();
-
             thread::spawn(move || core(handle));
             // println!("Setup Function End");
             Ok(())
