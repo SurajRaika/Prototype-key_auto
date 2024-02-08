@@ -1,13 +1,10 @@
-use tauri::{AppHandle, Manager};
+use tauri::{ AppHandle, Manager };
 
-use std::{
-    sync::mpsc::{self, Receiver, Sender},
-    time::SystemTime,
-};
+use std::{ sync::mpsc::{ self, Receiver, Sender }, time::SystemTime };
 
 use crate::types::Action;
 use lazy_static::lazy_static;
-use rdev::{Event, EventType};
+use rdev::{ Event, EventType };
 use std::sync::Mutex;
 // crate::types
 
@@ -21,9 +18,7 @@ lazy_static! {
 // Callback function to be called when an input event is captured.
 pub fn input_event_callback(event: Event) {
     // Send the captured event to the channel.
-    INPUT_EVENT_CHANNEL
-        .0
-        .lock()
+    INPUT_EVENT_CHANNEL.0.lock()
         .expect("Failed to lock Event_Channel")
         .send(event)
         .expect("Receiver was stopped");
@@ -48,50 +43,48 @@ pub fn core(handle: AppHandle) {
             } else {
                 // Process the event based on its type.
                 match current_event.event_type {
-                    EventType::MouseMove { .. } => { /* Ignore mouse move events */ }
+                    EventType::MouseMove { .. } => {/* Ignore mouse move events */}
                     EventType::KeyPress(key) => {
                         // Check if the buffer already contains an event with the same EventType.
-                        if !buffer
-                            .iter()
-                            .any(|event| event.event_type == EventType::KeyPress(key))
-                        {
+                        if !buffer.iter().any(|event| event.event_type == EventType::KeyPress(key)) {
                             // If not, push the current_event into the buffer.
                             buffer.push(current_event.clone());
                         }
                     }
-                    EventType::Wheel { .. } => { /* Handle wheel events if needed */ }
+                    EventType::Wheel { .. } => {/* Handle wheel events if needed */}
                     EventType::KeyRelease(search_key) => {
                         if
-                                    let Some(index) = buffer
-                                        .iter()
-                                        .position(|event| {
-                                            matches!(
+                            let Some(index) = buffer
+                                .iter()
+                                .position(|event| {
+                                    matches!(
                                 event.event_type,
                                 EventType::KeyPress(key) | EventType::KeyRelease(key) if key == search_key
                             )
-                                        })
-                                {
-                                    parallel_actions.push(
-                                        Action::new(
-                                            &buffer[index],
-                                            &current_event,
-                                            &intial_system_time
-                                        )
-                                    );
-                                    buffer.remove(index);
-                                    if buffer.is_empty() {
-                                        println!("\n {:?}", parallel_actions);
+                                })
+                        {
+                            parallel_actions.push(
+                                Action::new(&buffer[index], &current_event, &intial_system_time)
+                            );
+                            buffer.remove(index);
+                            if buffer.is_empty() {
+                                println!("\n {:?}", parallel_actions);
 
-                                   
-    let json_data = serde_json::to_string(&parallel_actions).expect("Failed to serialize actions to JSON");
-           handle.emit_all("updateCounter", Some(json_data)).expect("Failed to send data");
-                                       
-                                        parallel_actions.clear();
-                                    }
-                                }
+                                let json_data = serde_json
+                                    ::to_string(&parallel_actions)
+                                    .expect("Failed to serialize actions to JSON");
+                                handle
+                                    .emit_all("updateCounter", Some(json_data))
+                                    .expect("Failed to send data");
+
+                                parallel_actions.clear();
+                            }
+                        }
                     }
-                    EventType::ButtonPress(_) | EventType::ButtonRelease(_) => { /* Handle button press or release events if needed */
-                    }
+                    | EventType::ButtonPress(_)
+                    | EventType::ButtonRelease(
+                          _,
+                      ) => {/* Handle button press or release events if needed */}
                 };
             }
         } else {
