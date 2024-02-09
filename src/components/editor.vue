@@ -44,14 +44,18 @@ interface KeyPress {
 
 async function start_recording(bool: boolean) {
   record.value = bool;
-
+if (bool) { 
   const ans = await invoke("start_record");
+  console.log(ans);
+}else{
+  const ans = await invoke("stop_record");
   console.log(ans);
 
 }
 
+}
+
 async function Intialise() {
-  record.value = true;
 
   await listen<String>('updateCounter', (event: Event<String>) => {
 
