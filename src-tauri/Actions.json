@@ -1,0 +1,14 @@
+[
+{
+    "id":1,"name":"KeyBiding1","Actions":[
+
+[{"key":"KeyF","duration":{"secs":0,"nanos":176102600},"start_time":{"secs":968,"nanos":635574700}}],
+[{"key":"KeyD","duration":{"secs":0,"nanos":119967600},"start_time":{"secs":970,"nanos":379546400}}],
+[{"key":"KeyS","duration":{"secs":0,"nanos":128001700},"start_time":{"secs":971,"nanos":43553100}}],
+[{"key":"KeyG","duration":{"secs":0,"nanos":143991900},"start_time":{"secs":971,"nanos":835556000}}],
+[{"key":"KeyF","duration":{"secs":0,"nanos":224019500},"start_time":{"secs":972,"nanos":411525900}}],
+[{"key":"KeyD","duration":{"secs":0,"nanos":135972500},"start_time":{"secs":973,"nanos":19518900}}]
+
+]
+}]
+

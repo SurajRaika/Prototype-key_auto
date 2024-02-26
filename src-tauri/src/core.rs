@@ -1,13 +1,10 @@
-use tauri::{AppHandle, Manager};
+use tauri::{ AppHandle, Manager };
 
-use std::{
-    sync::mpsc::{self, Receiver, Sender},
-    time::SystemTime,
-};
+use std::{ sync::mpsc::{ self, Receiver, Sender }, time::SystemTime };
 
-use crate::{types::Action, MYREC};
+use crate::{ types::Action, MYREC };
 use lazy_static::lazy_static;
-use rdev::{Event, EventType};
+use rdev::{ Event, EventType };
 use std::sync::Mutex;
 // crate::types
 
@@ -21,9 +18,7 @@ lazy_static! {
 // Callback function to be called when an input event is captured.
 pub fn input_event_callback(event: Event) {
     // Send the captured event to the channel.
-    INPUT_EVENT_CHANNEL
-        .0
-        .lock()
+    INPUT_EVENT_CHANNEL.0.lock()
         .expect("Failed to lock Event_Channel")
         .send(event)
         .expect("Receiver was stopped");
@@ -75,24 +70,35 @@ pub fn core(handle: AppHandle) {
                             if buffer.is_empty() {
                                 println!("\n {:?}", parallel_actions);
 
-                                let json_data = serde_json
+                                let app_data_dir=handle.path_resolver().app_data_dir().expect("Failed to read app_daata_dir");
+                                let app_json_path=app_data_dir.join("EventKeys.json");
+                                
+                            //    tauri::generate_context!()
+                            //    handle.path_resolver()
+
+
+
+
+
+
+                                // Recording Switch
+                                let is_recording: bool;
+                                let rec = &handle.state::<MYREC>().0;
+                                let recording_lock = rec.lock().unwrap();
+                                is_recording = *recording_lock;
+                                if is_recording {
+
+                                    let json_data = serde_json
                                     ::to_string(&parallel_actions)
                                     .expect("Failed to serialize actions to JSON");
-                                    let is_recording: bool;
-
-                                let rec=&handle.state::<MYREC>().0;
-                                let recording_lock = rec.lock().unwrap();
-        is_recording = *recording_lock;
-                                println!("rec:{}",is_recording);
-                                if is_recording {
-                                handle
-                                    .emit_all("updateCounter", Some(json_data))
-                                    .expect("Failed to send data");
-
-
+                                
+                                    // Emit Keys 
+                                    handle
+                                        .emit_all("updateCounter", Some(json_data))
+                                        .expect("Failed to send data");
                                 }
 
-                                                                parallel_actions.clear();
+                                parallel_actions.clear();
                             }
                         }
                     }

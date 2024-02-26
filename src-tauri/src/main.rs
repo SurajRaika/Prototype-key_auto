@@ -30,11 +30,12 @@ fn main() {
     // let app_state = AppState::default();
 
     tauri::Builder::default()
+        .device_event_filter(tauri::DeviceEventFilter::Always)
         .invoke_handler(tauri::generate_handler![start_record, stop_record])
         .setup(|app| {
             app.manage(MYREC(Arc::new(Mutex::new(false))));
             // Spawn a new thread to listen for input events using the callback function.
-            thread::spawn(|| {
+            tauri::async_runtime::spawn(async move {
                 if let Err(error) = listen(input_event_callback) {
                     println!("Error: {:?}", error)
                 }
