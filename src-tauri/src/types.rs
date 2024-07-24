@@ -5,12 +5,13 @@ use std::time::{Duration, SystemTime};
 use rdev::{Event, EventType, Key};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Action {
     pub key: String,
     pub duration: Duration,
     pub start_time: Duration,
 }
+pub type ParallelActions = Vec<Action>;
 
 impl Action {
     pub fn new(
@@ -37,5 +38,15 @@ impl Action {
         }
     }
 }
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct EventKey {
+    pub id: i32,
+    pub name: String,
+    pub event: Vec<ParallelActions>,
+    pub actions: Vec<ParallelActions>,
+}
+
+pub type EventKeys = Vec<EventKey>;
 
 // Other types or structs can be defined here as needed
