@@ -43,6 +43,7 @@ impl Action {
 pub struct EventKey {
     pub id: i32,
     pub name: String,
+    pub description: String,
     pub event: Vec<ParallelActions>,
     pub actions: Vec<ParallelActions>,
 }

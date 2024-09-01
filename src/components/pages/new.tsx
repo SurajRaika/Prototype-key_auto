@@ -8,9 +8,7 @@ function NewAction() {
 
   return (
     <div>
-      <div>Count: {count}</div>
-      <button onClick={() => dispatch(increment())}>Increment</button>
-      <button onClick={() => dispatch(decrement())}>Decrement</button>
+     Action
     </div>
   );
 }

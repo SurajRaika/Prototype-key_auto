@@ -1,20 +1,19 @@
 import React from 'react';
 import { Routes, Route,Link } from 'react-router-dom';
-import Home from './components/pages/home.tsx';
-import NewAction from './components/pages/new.tsx';
+import Home from './components/pages/Home';
+import Navbar from './components/NavigationBar';
+
+import CreateAction from './components/pages/CreateAction';
 // import NotFound from './components/pages/NotFound';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-                <Link to="/">Home</Link>  
-                <br />
-                <Link to="/NewAction">NewAction</Link>
-
+      <Navbar/>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/NewAction" element={<NewAction />} />
+        <Route path="/NewAction" element={<CreateAction />} />
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </div>

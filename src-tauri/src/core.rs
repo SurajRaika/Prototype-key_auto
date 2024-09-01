@@ -72,25 +72,37 @@ pub fn core(handle: AppHandle) {
                             buffer.remove(index);
                             
                             if buffer.is_empty() {
-                                println!("\n \n  {:?} \n  \n", parallel_actions);
+                                // println!("\n \n  {:?} \n  \n", parallel_actions);
 
                                 let handle_event_state = &handle.state::<ActiveEventKeys>().0;
                                 let event_keys_lock = handle_event_state.lock().unwrap();
                                 let event_keys = &*event_keys_lock;
                                 
+
+
+                                let is_Activated: bool;
+                                let aec = &handle.state::<MyActivated>().0;
+                                let aec_lock = aec.lock().unwrap();
+                                is_Activated = *aec_lock;
+
+
+
+
+
+
                                 for event_key in event_keys {
                                     if actions_match(&event_key.event[0], &parallel_actions) {
-                                        println!("Actions match!");
-                                        println!("Counter before async task: {}", *counter.lock().unwrap());
+                                        // println!("Actions match!");
+                                        // println!("Counter before async task: {}", *counter.lock().unwrap());
 
-                                        if *counter.lock().unwrap() != 0 {
+                                        if *counter.lock().unwrap() != 0  || !is_Activated{
                                             break;
                                         }
 
                                         let cloned_actions = event_key.actions.clone();
                                         let initial_action_time = event_key.actions[0][0].start_time;
 
-                                        println!("Add");
+                                        // println!("Add");
 
                                         for actions in cloned_actions {
                                             let counter_clone = Arc::clone(&counter);
@@ -98,7 +110,7 @@ pub fn core(handle: AppHandle) {
                                                 {
                                                     let mut counter = counter_clone.lock().unwrap();
                                                     *counter += 1;
-                                                    println!("Add Counter: {:?}", *counter);
+                                                    // println!("Add Counter: {:?}", *counter);
                                                 }
 
                                                 let delay = actions[0].start_time.saturating_sub(initial_action_time);
@@ -107,7 +119,7 @@ pub fn core(handle: AppHandle) {
 
                                                 let mut counter = counter_clone.lock().unwrap();
                                                 *counter -= 1;
-                                                println!("Remove Counter: {:?}", *counter);
+                                                // println!("Remove Counter: {:?}", *counter);
                                             });
                                         }
                                         
@@ -123,12 +135,6 @@ pub fn core(handle: AppHandle) {
                                 let recording_lock = rec.lock().unwrap();
                                 is_recording = *recording_lock;
                                 if is_recording {
-
-
-                                let is_Activated: bool;
-                                let aec = &handle.state::<MyActivated>().0;
-                                let aec_lock = aec.lock().unwrap();
-                                is_Activated = *aec_lock;
 
 
 
@@ -149,7 +155,7 @@ pub fn core(handle: AppHandle) {
                 };
             }
         } else {
-            println!("Previous event is none");
+            // println!("Previous event is none");
         }
 
         previous_event = Some(current_event.clone());

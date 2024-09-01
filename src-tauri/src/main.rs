@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::api::path::app_local_data_dir;
 use tauri::{self, Manager};
 use types::{EventKey, EventKeys};
 mod utils;
@@ -19,7 +20,7 @@ use std::io::Read;
 mod commands;
 mod core;
 mod types;
-use crate::commands::{start_record, stop_record};
+use crate::commands::{start_record, stop_record,Play,Pause,add_active_event_key,remove_active_event_key};
 use crate::core::core;
 use crate::core::input_event_callback;
 
@@ -43,22 +44,34 @@ fn main() {
 
     tauri::Builder::default()
         .device_event_filter(tauri::DeviceEventFilter::Always)
-        .invoke_handler(tauri::generate_handler![start_record, stop_record])
+        .invoke_handler(tauri::generate_handler![start_record, stop_record,Pause,Play,add_active_event_key,remove_active_event_key])
         .setup(|app| {
-            let path = std::path::Path::new(
-                "/home/surajraika/.local/share/com.KeyAuto.dev/EventKeys.json",
-            );
-            let mut file = File::open(&path).expect("Failed to open EventKeys.json");
-            let mut contents = String::new();
-            file.read_to_string(&mut contents)
-                .expect("Failed to read file");
-            println!("File contents: {}", contents);
-            let event_key: EventKeys =
-                serde_json::from_str(&contents).expect("Failed to parse JSON");
+
+        //     let app_local_data_dir = app.path_resolver()
+        // .app_local_data_dir()
+        // .expect("Failed to get app local data directory");
+    
+            // let data_file_path = app_local_data_dir.join("EventKeys.json");
+            
+            // println!("{:?}",data_file_path);
+            
+            // let path = std::path::Path::new(
+            //     "/home/surajraika/.local/share/com.KeyAuto.dev/EventKeys.json",
+            // );
+            // let mut file = File::open(&data_file_path).expect("Failed to open EventKeys.json");
+            
+            // let mut contents = String::new();
+            
+            // file.read_to_string(&mut contents)
+            //     .expect("Failed to read file");
+                
+            // println!("File contents: {}", contents);
+            // let event_key: EventKeys =
+            //     serde_json::from_str(&contents).expect("Failed to parse JSON");
 
             app.manage(MYREC(Arc::new(Mutex::new(false))));
             app.manage(MyActivated(Arc::new(Mutex::new(false))));
-            app.manage(ActiveEventKeys(Arc::new(Mutex::new(event_key))));
+            app.manage(ActiveEventKeys(Arc::new(Mutex::new([].to_vec()))));
 
             // Spawn a new thread to listen for input events using the callback function.
             tauri::async_runtime::spawn(async move {
